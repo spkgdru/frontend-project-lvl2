@@ -1,3 +1,4 @@
+
 export default (object1, object2) => {
   const keys = Object.keys({...object1, ...object2});
   const diff =  keys.reduce((acc, value) => {
