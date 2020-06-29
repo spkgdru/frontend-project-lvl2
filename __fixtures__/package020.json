@@ -1,13 +1,14 @@
 {
   "name": "frontend-project-lvl2",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "show a difference of two configuration files",
   "main": "index.js",
   "bin": {
     "gendiff": "bin/gendiff.js"
   },
   "scripts": {
-    "test": "npx -n --experimental-vm-modules jest"
+    "test": "make lint",
+    "build": "make build"
   },
   "type": "module",
   "repository": {
@@ -15,15 +16,10 @@
     "url": "git+https://github.com/spkgdru/frontend-project-lvl2.git"
   },
   "author": "spkgdru",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/spkgdru/frontend-project-lvl2/issues"
   },
   "homepage": "https://github.com/spkgdru/frontend-project-lvl2#readme",
-  "jest": {
-    "testEnvironment": "node",
-    "transform": {}
-  },
   "dependencies": {
     "commander": "^5.1.0",
     "lodash": "^4.17.15"
@@ -31,8 +27,6 @@
   "devDependencies": {
     "eslint": "^7.2.0",
     "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-jest": "^23.17.1",
     "jest": "^26.0.1"
   }
 }
