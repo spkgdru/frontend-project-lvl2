@@ -1,16 +1,19 @@
 import path from 'path';
 import fs from 'fs';
+import yml from 'js-yaml';
+import ini from 'ini';
 
 const filetypeHandler = {
-  ".ini": (data) => data,
-  ".json": (data) => JSON.parse(data),
-  ".yml": (data) => data, 
-}
+  '.ini': (data) => ini.decode(data),
+  '.json': (data) => JSON.parse(data),
+  '.yml': (data) => yml.safeLoad(data),
+  '.yaml': (data) => yml.safeLoad(data),
+};
 
-export default(filepath) => {
+export default (filepath) => {
   const filetype = path.extname(filepath);
   if (!filetypeHandler[filetype]) return null;
   const absolutePath = path.resolve(process.cwd(), filepath);
   const fileData = fs.readFileSync(absolutePath, 'utf-8');
-  return filetypeHandler[filetype](fileData);  
-}
+  return filetypeHandler[filetype](fileData);
+};
