@@ -5,13 +5,13 @@ import parser from '../src/parser.js';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
-test('parserJSON', () => {
-  expect(parser(path.resolve(__dirname, './__fixtures__/smallBefore.json'))).toEqual({
+test('simpleJSON', () => {
+  expect(parser(path.resolve(__dirname, './__fixtures__/json/simpleBefore.json'))).toEqual({
     a: '1', b: '2', c: '3', d: '4', e: '5', f: '6',
   });
 });
 
-test('parserYML', () => {
+test('simpleYML', () => {
   const ymlData = parser(path.resolve(__dirname, './__fixtures__/case1.yml'));
   expect(ymlData).toEqual({
     env: {
@@ -31,7 +31,7 @@ test('parserYML', () => {
   });
 });
 
-test('parserINI', () => {
+test('simpleINI', () => {
   const iniData = parser(path.resolve(__dirname, './__fixtures__/foo.ini'));
   expect(iniData).toEqual({});
 });
