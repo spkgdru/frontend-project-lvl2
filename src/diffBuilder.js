@@ -1,41 +1,41 @@
-export default (object1, object2) => {
-  const builder = (innerObject1, innerObject2, parentValue) => {
-    const keys = Object.keys({ ...innerObject1, ...innerObject2 });
+export default (parsedConf1, parsedConf2) => {
+  const buildDiff = (config1, config2, parents = []) => {
+    const keys = Object.keys({ ...config1, ...config2 });
     return keys.reduce((acc, key) => {
-      if ((typeof (innerObject1[key]) === 'object') && (typeof (innerObject2[key]) === 'object')) {
+      if ((typeof (config1[key]) === 'object') && (typeof (config2[key]) === 'object')) {
         acc[key] = {
           status: 'object',
-          parent: parentValue,
-          children: builder(innerObject1[key], innerObject2[key]),
+          parent: parents,
+          children: buildDiff(config1[key], config2[key], [...parents, key]),
         };
-      } else if (innerObject1[key] && !innerObject2[key]) {
+      } else if (config1[key] && !config2[key]) {
         acc[key] = {
           status: 'deleted',
-          parent: parentValue,
-          oldValue: innerObject1[key],
+          parent: parents,
+          oldValue: config1[key],
         };
-      } else if (innerObject2[key] && !innerObject1[key]) {
+      } else if (config2[key] && !config1[key]) {
         acc[key] = {
           status: 'added',
-          parent: parentValue,
-          value: innerObject2[key],
+          parent: parents,
+          value: config2[key],
         };
-      } else if (innerObject1[key] !== innerObject2[key]) {
+      } else if (config1[key] !== config2[key]) {
         acc[key] = {
           status: 'modified',
-          parent: parentValue,
-          oldValue: innerObject1[key],
-          value: innerObject2[key],
+          parent: parents,
+          oldValue: config1[key],
+          value: config2[key],
         };
       } else {
         acc[key] = {
           status: 'nonModified',
-          parent: parentValue,
-          value: innerObject2[key],
+          parent: parents,
+          value: config2[key],
         };
       }
       return acc;
     }, {});
   };
-  return builder(object1, object2);
+  return buildDiff(parsedConf1, parsedConf2);
 };
