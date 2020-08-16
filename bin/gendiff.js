@@ -10,5 +10,3 @@ program
   .action(console.log(genDiff(...program.args, program.format)))
   .arguments('<filepath1> <filepath2>')
   .parse(process.argv);
-
-

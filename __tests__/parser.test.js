@@ -39,4 +39,4 @@ test('simpleINI', () => {
 test('errors', () => {
   expect(parser('/unexistingFile')).toThrow('unsupported file format');
   expect(parser('/unexistingFile.json')).toThrow('Error');
-})
+});
