@@ -1,42 +1,19 @@
 /* eslint-disable no-underscore-dangle */
 
+import fs from 'fs';
 import path from 'path';
 import parser from '../src/parser.js';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
-test('simpleJSON', () => {
-  expect(parser(path.resolve(__dirname, './__fixtures__/json/simpleBefore.json'))).toEqual({
-    a: '1', b: '2', c: '3', d: '4', e: '5', f: '6',
-  });
+test('parse JSON 1', () => {
+  const filepath = path.resolve(__dirname, './__fixtures__/json/simpleConfig.json');
+  const parsedContent = parser(filepath);
+  const readedContent = fs.readFileSync(filepath, 'utf-8');
+  expect(parsedContent).toEqual(JSON.parse(readedContent));
 });
 
-test('simpleYML', () => {
-  const ymlData = parser(path.resolve(__dirname, './__fixtures__/case1.yml'));
-  expect(ymlData).toEqual({
-    env: {
-      node: true,
-    },
-    extends: [
-      'airbnb-base',
-      'plugin:jest/recommended',
-    ],
-    plugins: [
-      'jest',
-    ],
-    rules: {
-      'import/extensions': 0,
-      'no-console': 0,
-    },
-  });
-});
-
-test('simpleINI', () => {
-  const iniData = parser(path.resolve(__dirname, './__fixtures__/foo.ini'));
-  expect(iniData).toEqual({});
-});
-
-test('errors', () => {
-  expect(parser('/unexistingFile')).toThrow('unsupported file format');
-  expect(parser('/unexistingFile.json')).toThrow('Error');
+test('parse unsupported file', () => {
+  const filepath = path.resolve(__dirname, './__fixtures__/json/simpleConfig.scr');
+  expect(parser(filepath)).toThrow();
 });
