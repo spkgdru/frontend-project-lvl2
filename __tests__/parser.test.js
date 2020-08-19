@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import parser from '../src/parser.js';
+import parser from '../src/parsers.js';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -15,5 +15,14 @@ test('parse JSON 1', () => {
 
 test('parse unsupported file', () => {
   const filepath = path.resolve(__dirname, './__fixtures__/json/simpleConfig.scr');
-  expect(parser(filepath)).toThrow();
+  expect(() => {
+    parser(filepath);
+  }).toThrow();
+});
+
+test('parse unexisting file', () => {
+  const fakePath = path.resolve(__dirname, './__fixtures__/json/fakeConfig.json');
+  expect(() => {
+    parser(fakePath);
+  }).toThrow();
 });

@@ -3,7 +3,7 @@ import fs from 'fs';
 import yml from 'js-yaml';
 import ini from 'ini';
 
-const readFile = (filepath) => {
+const readConfig = (filepath) => {
   const absolutePath = path.resolve(process.cwd(), filepath);
   const content = fs.readFileSync(absolutePath, 'utf-8');
   return content;
@@ -19,10 +19,10 @@ const configTypeParser = {
 };
 
 export default (filepath) => {
-  const filetype = defineConfigType(filepath);
-  if (!configTypeParser[filetype]) {
-    throw new Error(`${filetype} is unsupported file format`);
+  const configType = defineConfigType(filepath);
+  if (!configTypeParser[configType]) {
+    throw new Error(`${configType} is unsupported config format`);
   }
-  const content = readFile(filepath);
-  return configTypeParser[filetype](content);
+  const content = readConfig(filepath);
+  return configTypeParser[configType](content);
 };
