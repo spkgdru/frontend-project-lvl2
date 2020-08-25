@@ -1,9 +1,9 @@
-import plain from './toPlain.js';
-import stylish from './toStylish.js';
-import json from './toJson.js';
+import plain from './plain.js';
+import stylish from './stylish.js';
+import json from './json.js';
 
-const diffHandler = {
+const formatters = {
   plain, stylish, json,
 };
 
-export default (diffData, format) => diffHandler[format](diffData);
+export default (diffData, format) => formatters[format](diffData);

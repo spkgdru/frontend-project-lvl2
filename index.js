@@ -1,9 +1,9 @@
-import parser from './src/parsers.js';
-import diffBuilder from './src/diffBuilder.js';
-import formatter from './src/formatters/index.js';
+import parsers from './src/parsers.js';
+import genDiff from './src/diffBuilder.js';
+import formatters from './src/formatters/index.js';
 
 export default (filepath1, filepath2, format = 'stylish') => {
-  const [parsed1, parsed2] = [parser(filepath1), parser(filepath2)];
-  const diff = diffBuilder(parsed1, parsed2);
-  return formatter(diff, format);
+  const [parsed1, parsed2] = [parsers(filepath1), parsers(filepath2)];
+  const diff = genDiff(parsed1, parsed2);
+  return formatters(diff, format);
 };
