@@ -9,19 +9,19 @@ const getStatus = (previousValue, currentValue) => {
 };
 
 export default (config1, config2) => {
-  const buildDiff = (object1, object2, path = []) => {
+  const buildDiff = (object1, object2) => {
     const keys = _.uniq([...Object.keys(object1), ...Object.keys(object2)]).sort();
     return keys.reduce((acc, key) => {
       const previousValue = object1[key];
       const currentValue = object2[key];
       const status = getStatus(previousValue, currentValue);
-      const diffElement = {
-        key, previousValue, currentValue, status, path,
+      const newElement = {
+        key, previousValue, currentValue, status,
       };
       if (status === 'nested') {
-        diffElement.children = buildDiff(previousValue, currentValue, [...path, key]);
+        newElement.children = buildDiff(previousValue, currentValue);
       }
-      return [...acc, diffElement];
+      return [...acc, newElement];
     }, []);
   };
   return buildDiff(config1, config2);

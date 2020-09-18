@@ -1,52 +1,34 @@
 import _ from 'lodash';
 
-const baseIndentWidth = 2;
+const baseIntend = ' ';
+const defaultIntendWidth = 4;
+const currentIntend = baseIntend.repeat(defaultIntendWidth);
 
-const isComplex = value => {
-    return _.isPlainObject(value)
+export default (diff) => {
+  const format = (diffArray, depth = 0) => {
+    const closedBracketIntend = currentIntend.repeat(depth);
+    const formattedDiff = diffArray.reduce((acc, value) => {
+      const stringType1 = `${currentIntend.repeat(value.depth)}${value.key}: ${value.currentValue}`;
+      const stringType2 = `${currentIntend.repeat(value.depth)}${value.key}: ${value.previousValue}`;
+      switch (value.status) {
+        case 'added':
+          acc.push(_.padStart(`+ ${_.trim(stringType1)}`, stringType1.length));
+          break;
+        case 'deleted':
+          acc.push(_.padStart(`- ${_.trim(stringType2)}`, stringType2.length));
+          break;
+        case 'changed':
+          acc.push(`${_.padStart(`+ ${_.trim(stringType1)}`, stringType1.length)}\n${_.padStart(`- ${_.trim(stringType2)}`, stringType2.length)}`);
+          break;
+        case 'nested':
+          acc.push(`${currentIntend.repeat(value.depth)}${value.key}: ${format(value.children, depth + 1)}`);
+          break;
+        default:
+          acc.push(stringType1);
+      }
+      return acc;
+    }, []);
+    return `{\n${formattedDiff.join('\n')}\n${closedBracketIntend}}`;
+  };
+  return format(diff);
 };
-
-const printComplexValue = (value, currentIndent) => {
-  const space = " ";
-  const prefix = "{\n";
-  const suffix = `\n${space.repeat(currentIndent)}}`;
-  const values = Object.entries(value);
-  const formattedValues = values.reduce((acc, [key, currentValue]) => {
-    const head = `${" ".repeat(currentIndent + baseIndentWidth)}${key}: `;
-    const body = isComplex(currentValue) ? printComplexValue(currentValue, currentIndent + baseIndentWidth) : `${currentValue}`;
-    return [...acc, head + body];
-  }, []);
-  return `${prefix}${formattedValues.join("\n")}${suffix}`;
-}
-
-const formatValue = value => {
-  const {key, previousValue, currentValue, status, level} = value;
-  const currentIndentWidth = baseIndentWidth + level.length * baseIndentWidth
-  const result = [];
-  const currentShift = ' '.repeat(currentIndentWidth);
-  switch(status) {
-    case "added":
-      result.push(`+ ${key}: ${isComplex(currentValue) ? printComplexValue(currentValue, currentIndentWidth) : currentValue}`);
-      break;
-    case "deleted":
-      result.push(`- ${key}: ${isComplex(previousValue) ? printComplexValue(previousValue, currentIndentWidth + 2) : previousValue}`);
-      break;
-    case "changed":
-      result.push(`- ${key}: ${previousValue}`);
-      result.push(`+ ${key}: ${currentValue}`);
-      break;
-    default:
-      result.push(`  ${key}: ${isComplex(currentValue) ? printComplexValue(currentValue, currentIndentWidth) : currentValue}`);
-  }
-  return result.map(string => currentShift + string).join('\n');
-};
-
-const buildStylish = diffData => {
-  const result = diffData.reduce((acc, param) => {
-    if (_.has(param, "children")) return [...acc, `${param.key}: ${buildStylish(param.children)}`];
-    return [...acc, formatValue(param)];
-  }, []);
-  return `{\n${result.join('\n')}\n}`;
-}
-
-export default buildStylish;
