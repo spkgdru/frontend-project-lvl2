@@ -16,14 +16,14 @@ test('parse JSON', () => {
 });
 
 test('parse YAML', () => {
-  const filepath = path.resolve(__dirname, './__fixtures__/yaml/config1.yaml');
+  const filepath = path.resolve(__dirname, './__fixtures__/yaml/config.yaml');
   const parsedContent = parser(filepath);
   const readedContent = fs.readFileSync(filepath, 'utf-8');
   expect(parsedContent).toEqual(yaml.safeLoad(readedContent));
 });
 
 test('parse INI', () => {
-  const filepath = path.resolve(__dirname, './__fixtures__/ini/config1.ini');
+  const filepath = path.resolve(__dirname, './__fixtures__/ini/config.ini');
   const parsedContent = parser(filepath);
   const readedContent = fs.readFileSync(filepath, 'utf-8');
   expect(parsedContent).toEqual(ini.decode(readedContent));

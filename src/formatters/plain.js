@@ -1,29 +1,34 @@
-const statusHandler = (param) => {
-  const { key, status, path } = param;
-  const previousValue = typeof param.previousValue === 'object' ? '[complex value]' : param.previousValue;
-  const currentValue = typeof param.currentValue === 'object' ? '[complex value]' : param.currentValue;
-  const name = path.length > 0 ? `${path.join('.')}.${key}` : `${key}`;
-  let output = '';
-  switch (status) {
-    case 'added':
-      output = `Property ${name} was added with value: ${currentValue}`;
-      break;
-    case 'deleted':
-      output = `Property ${name} was removed`;
-      break;
-    case 'changed':
-      output = `Property ${name} was updated. From ${previousValue} to ${currentValue}`;
-      break;
-    default:
-      output = '';
-  }
-  return output;
+import _ from 'lodash';
+
+const performValue = (value) => {
+  if (_.isObjectLike(value)) return '[complex value]';
+  if (_.isBoolean(value) || _.isNull(value)) return value;
+  return `'${value}'`;
 };
 
-const toPlain = (diffData) => diffData.reduce((acc, value) => {
-  if (value.children) return toPlain(value.children);
-  if (value.status === 'unmodified') return acc;
-  return `${acc + statusHandler(value)}\n`;
-}, '');
+const elementToString = (element, path) => {
+  const {
+    key, status, currentValue, previousValue,
+  } = element;
+  const name = path.length > 0 ? `${path.join('.')}.${key}` : `${key}`;
+  switch (status) {
+    case 'added':
+      return `Property '${name}' was added with value: ${performValue(currentValue)}`;
+    case 'deleted':
+      return `Property '${name}' was removed`;
+    case 'changed':
+      return `Property '${name}' was updated. From ${performValue(previousValue)} to ${performValue(currentValue)}`;
+    default:
+      return '';
+  }
+};
 
-export default toPlain;
+export default (diff) => {
+  const format = (diffData, path = []) => diffData.reduce((acc, value) => {
+    if (value.children) return [...acc, ...format(value.children, [...path, value.key])];
+    if (value.status === 'unmodified') return acc;
+    return [...acc, elementToString(value, path)];
+  }, []);
+  const result = format(diff).join('\n');
+  return result;
+};
