@@ -1,1 +1,1 @@
-{"name":"simpleConfig","year":2020,"location":"darkSideofTheMoon"}
+{"key1":123,"key2":"abc","key3":true,"key4":[1,"a",[11]],"key5":{"innerKey1":789,"innerKey2":"xyz","innerKey3":{"z":"fff"}}}
