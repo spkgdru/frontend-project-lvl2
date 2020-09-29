@@ -5,11 +5,11 @@
 
 "frontend-project-lvl2" is a training javascript project. The main project task is building javascript application which could compare two files with specific format and display the difference between its. It can work as CLI-script and as Node-JS library package. 
 The program compares two configuration files and shows a difference. It works with three types of incoming file format, such as: json, yaml and ini. 
-To use cli-script you should enter program name (gendiff) and pathes to files for matching: gendiff 'file1' ' file2'. It supports relative and absolute path to file.
+To use cli-script you should enter program name (gendiff) and pathes to files for matching: gendiff 'file1' ' file2'. It supports relative and absolute path to file.</br>
 <a href="https://asciinema.org/a/UWSfBl4VStuJ0H09wX6lGHX0h" target="_blank">See an example at asciinema</a>
 
-Starting script with no options you get output data in default output format named 'stylish'. It is possible to change output format to 'plain text' or 'json'. Add option '-f' to command and type prefered output format.
+Starting script with no options you get output data in default output format named 'stylish'. It is possible to change output format to 'plain text' or 'json'. Add option '-f' to command and type prefered output format.</br>
 
-<a href="https://asciinema.org/a/4vaK71MM1Z7qv3D5GiqxoFC7z" target="_blank"><img src="https://asciinema.org/a/4vaK71MM1Z7qv3D5GiqxoFC7z.svg" /></a>
-<a href="https://asciinema.org/a/cEdSVlOeCF60qxHTJOrho4KXb" target="_blank"><img src="https://asciinema.org/a/cEdSVlOeCF60qxHTJOrho4KXb.svg" /></a>
+<a href="https://asciinema.org/a/4vaK71MM1Z7qv3D5GiqxoFC7z" target="_blank">See an example at asciinema</a></br>
+<a href="https://asciinema.org/a/cEdSVlOeCF60qxHTJOrho4KXb" target="_blank">See an example at asciinema</a>
 
