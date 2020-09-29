@@ -17,23 +17,22 @@ export default (diff) => {
   const format = (diffArray, depth = 1) => {
     const closedBracketIntend = currentIntend.repeat(depth - 1);
     const formattedDiff = diffArray.reduce((acc, value) => {
-      const stringType1 = `${currentIntend.repeat(depth)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depth + 1) : value.currentValue}`;
-      const stringType2 = `${currentIntend.repeat(depth)}${value.key}: ${_.isPlainObject(value.previousValue) ? printComplexValue(value.previousValue, depth + 1) : value.previousValue}`;
+      const buildString = param => `${currentIntend.repeat(depth)}${value.key}: ${_.isPlainObject(param) ? printComplexValue(param, depth + 1) : param}`;
       switch (value.status) {
         case 'added':
-          acc.push(_.padStart(`+ ${_.trim(stringType1)}`, stringType1.length));
+          acc.push(_.padStart(`+ ${_.trim(buildString(value.currentValue))}`, buildString(value.currentValue).length));
           break;
         case 'deleted':
-          acc.push(_.padStart(`- ${_.trim(stringType2)}`, stringType2.length));
+          acc.push(_.padStart(`- ${_.trim(buildString(value.previousValue))}`, buildString(value.previousValue).length));
           break;
         case 'changed':
-          acc.push(`${_.padStart(`- ${_.trim(stringType2)}`, stringType2.length)}\n${_.padStart(`+ ${_.trim(stringType1)}`, stringType1.length)}`);
+          acc.push(`${_.padStart(`- ${_.trim(buildString(value.previousValue))}`, buildString(value.previousValue).length)}\n${_.padStart(`+ ${_.trim(buildString(value.currentValue))}`, buildString(value.currentValue).length)}`);
           break;
         case 'nested':
           acc.push(`${currentIntend.repeat(depth)}${value.key}: ${format(value.children, depth + 1)}`);
           break;
         default:
-          acc.push(stringType1);
+          acc.push(buildString(value.currentValue));
       }
       return acc;
     }, []);
