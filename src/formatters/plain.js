@@ -16,11 +16,9 @@ const elementToString = (element, path) => {
       return `Property '${name}' was added with value: ${performValue(currentValue)}`;
     case 'deleted':
       return `Property '${name}' was removed`;
-    case 'changed':
-      return `Property '${name}' was updated. From ${performValue(previousValue)} to ${performValue(currentValue)}`;
     default:
-      return '';
-  }
+      return `Property '${name}' was updated. From ${performValue(previousValue)} to ${performValue(currentValue)}`;
+  };
 };
 
 export default (diff) => {
