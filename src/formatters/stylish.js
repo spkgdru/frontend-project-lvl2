@@ -17,7 +17,7 @@ export default (diff) => {
   const format = (diffArray, depth = 1) => {
     const closedBracketIntend = currentIntend.repeat(depth - 1);
     const formattedDiff = diffArray.reduce((acc, value) => {
-      const buildString = param => `${currentIntend.repeat(depth)}${value.key}: ${_.isPlainObject(param) ? printComplexValue(param, depth + 1) : param}`;
+      const buildString = (param) => `${currentIntend.repeat(depth)}${value.key}: ${_.isPlainObject(param) ? printComplexValue(param, depth + 1) : param}`;
       switch (value.status) {
         case 'added':
           acc.push(_.padStart(`+ ${_.trim(buildString(value.currentValue))}`, buildString(value.currentValue).length));

@@ -18,7 +18,7 @@ const elementToString = (element, path) => {
       return `Property '${name}' was removed`;
     default:
       return `Property '${name}' was updated. From ${performValue(previousValue)} to ${performValue(currentValue)}`;
-  };
+  }
 };
 
 export default (diff) => {
