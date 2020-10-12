@@ -11,35 +11,32 @@ const printComplexValue = (value, depth) => {
 };
 
 const build = (data, depth = 0) => {
-  const buildString = (value, depthLevel) => {
-    const typeDispatch = {
-      added: () => {
-        const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
-        return (_.padStart(`+ ${_.trim(result)}`, result.length, indent));
-      },
-      deleted: () => {
-        const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.previousValue) ? printComplexValue(value.previousValue, depthLevel) : value.previousValue}`;
-        return (_.padStart(`- ${_.trim(result)}`, result.length, indent));
-      },
-      changed: () => {
-        const result1 = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
-        const result2 = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.previousValue) ? printComplexValue(value.previousValue, depthLevel) : value.previousValue}`;
-        return `${_.padStart(`- ${_.trim(result2)}`, result2.length, indent)}\n${_.padStart(`+ ${_.trim(result1)}`, result1.length, indent)}`;
-      },
-      unmodified: () => {
-        const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
-        return result;
-      },
-      nested: () => {
-        const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${build(value.children, depthLevel)}`;
-        return result;
-      },
-    };
-    return typeDispatch[value.status]();
+  const typeDispatch = {
+    added: (value, depthLevel) => {
+      const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
+      return (_.padStart(`+ ${_.trim(result)}`, result.length, indent));
+    },
+    deleted: (value, depthLevel) => {
+      const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.previousValue) ? printComplexValue(value.previousValue, depthLevel) : value.previousValue}`;
+      return (_.padStart(`- ${_.trim(result)}`, result.length, indent));
+    },
+    changed: (value, depthLevel) => {
+      const result1 = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
+      const result2 = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.previousValue) ? printComplexValue(value.previousValue, depthLevel) : value.previousValue}`;
+      return `${_.padStart(`- ${_.trim(result2)}`, result2.length, indent)}\n${_.padStart(`+ ${_.trim(result1)}`, result1.length, indent)}`;
+    },
+    unmodified: (value, depthLevel) => {
+      const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
+      return result;
+    },
+    nested: (value, depthLevel) => {
+      const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${build(value.children, depthLevel)}`;
+      return result;
+    },
   };
 
   const result = data.reduce((acc, value) => {
-    const newString = buildString(value, depth + 1);
+    const newString = typeDispatch[value.status](value, depth + 1);
     return [...acc, newString];
   }, '');
   return `{\n${result.join('\n')}\n${currentIndent.repeat(depth)}}`;
