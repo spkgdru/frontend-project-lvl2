@@ -1,42 +1,48 @@
 import _ from 'lodash';
 
-const baseIntend = ' ';
-const defaultIntendWidth = 4;
-const currentIntend = baseIntend.repeat(defaultIntendWidth);
+const indent = ' ';
+const indentLength = 4;
+const currentIndent = indent.repeat(indentLength);
 
 const printComplexValue = (value, depth) => {
   const keys = Object.keys(value);
-  const formattedComplexValue = keys.map((key) => {
-    if (!_.isPlainObject(value[key])) return `${currentIntend.repeat(depth)}${key}: ${value[key]}`;
-    return `${currentIntend.repeat(depth)}${key}: ${printComplexValue(value[key], depth + 1)}`;
-  });
-  return `{\n${formattedComplexValue.join('\n')}\n${currentIntend.repeat(depth - 1)}}`;
+  const result = keys.map((key) => `${currentIndent.repeat(depth + 1)}${key}: ${_.isPlainObject(value[key]) ? printComplexValue(value[key], depth + 1) : value[key]}`);
+  return `{\n${result.join('\n')}\n${currentIndent.repeat(depth)}}`;
 };
 
-export default (diff) => {
-  const format = (diffArray, depth = 1) => {
-    const closedBracketIntend = currentIntend.repeat(depth - 1);
-    const formattedDiff = diffArray.reduce((acc, value) => {
-      const buildString = (param) => `${currentIntend.repeat(depth)}${value.key}: ${_.isPlainObject(param) ? printComplexValue(param, depth + 1) : param}`;
-      switch (value.status) {
-        case 'added':
-          acc.push(_.padStart(`+ ${_.trim(buildString(value.currentValue))}`, buildString(value.currentValue).length));
-          break;
-        case 'deleted':
-          acc.push(_.padStart(`- ${_.trim(buildString(value.previousValue))}`, buildString(value.previousValue).length));
-          break;
-        case 'changed':
-          acc.push(`${_.padStart(`- ${_.trim(buildString(value.previousValue))}`, buildString(value.previousValue).length)}\n${_.padStart(`+ ${_.trim(buildString(value.currentValue))}`, buildString(value.currentValue).length)}`);
-          break;
-        case 'nested':
-          acc.push(`${currentIntend.repeat(depth)}${value.key}: ${format(value.children, depth + 1)}`);
-          break;
-        default:
-          acc.push(buildString(value.currentValue));
-      }
-      return acc;
-    }, []);
-    return `{\n${formattedDiff.join('\n')}\n${closedBracketIntend}}`;
+const build = (data, depth = 0) => {
+  const buildString = (value, depthLevel) => {
+    const typeDispatch = {
+      added: () => {
+        const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
+        return (_.padStart(`+ ${_.trim(result)}`, result.length, indent));
+      },
+      deleted: () => {
+        const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.previousValue) ? printComplexValue(value.previousValue, depthLevel) : value.previousValue}`;
+        return (_.padStart(`- ${_.trim(result)}`, result.length, indent));
+      },
+      changed: () => {
+        const result1 = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
+        const result2 = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.previousValue) ? printComplexValue(value.previousValue, depthLevel) : value.previousValue}`;
+        return `${_.padStart(`- ${_.trim(result2)}`, result2.length, indent)}\n${_.padStart(`+ ${_.trim(result1)}`, result1.length, indent)}`;
+      },
+      unmodified: () => {
+        const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
+        return result;
+      },
+      nested: () => {
+        const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${build(value.children, depthLevel)}`;
+        return result;
+      },
+    };
+    return typeDispatch[value.status]();
   };
-  return format(diff);
+
+  const result = data.reduce((acc, value) => {
+    const newString = buildString(value, depth + 1);
+    return [...acc, newString];
+  }, '');
+  return `{\n${result.join('\n')}\n${currentIndent.repeat(depth)}}`;
 };
+
+export default (diffData) => build(diffData);
