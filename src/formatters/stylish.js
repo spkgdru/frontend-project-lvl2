@@ -4,42 +4,41 @@ const indent = ' ';
 const indentLength = 4;
 const currentIndent = indent.repeat(indentLength);
 
-const printComplexValue = (value, depth) => {
-  const keys = Object.keys(value);
-  const result = keys.map((key) => `${currentIndent.repeat(depth + 1)}${key}: ${_.isPlainObject(value[key]) ? printComplexValue(value[key], depth + 1) : value[key]}`);
-  return `{\n${result.join('\n')}\n${currentIndent.repeat(depth)}}`;
-};
-
-const build = (data, depth = 0) => {
-  const typeDispatch = {
-    added: (value, depthLevel) => {
-      const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
-      return (_.padStart(`+ ${_.trim(result)}`, result.length, indent));
-    },
-    deleted: (value, depthLevel) => {
-      const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.previousValue) ? printComplexValue(value.previousValue, depthLevel) : value.previousValue}`;
-      return (_.padStart(`- ${_.trim(result)}`, result.length, indent));
-    },
-    changed: (value, depthLevel) => {
-      const result1 = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
-      const result2 = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.previousValue) ? printComplexValue(value.previousValue, depthLevel) : value.previousValue}`;
-      return `${_.padStart(`- ${_.trim(result2)}`, result2.length, indent)}\n${_.padStart(`+ ${_.trim(result1)}`, result1.length, indent)}`;
-    },
-    unmodified: (value, depthLevel) => {
-      const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${_.isPlainObject(value.currentValue) ? printComplexValue(value.currentValue, depthLevel) : value.currentValue}`;
-      return result;
-    },
-    nested: (value, depthLevel) => {
-      const result = `${currentIndent.repeat(depthLevel)}${value.key}: ${build(value.children, depthLevel)}`;
-      return result;
-    },
+const render = (data, shift = 0) => {
+  const printResult = (result, level) => `{\n${result.join('\n')}\n${currentIndent.repeat(level)}}`;
+  const stringRender = (value, depth) => {
+    const currentShift = depth + 1;
+    const keyRendered = `${currentIndent.repeat(currentShift) + value.key}: `;
+    const printComplexValue = (complexValue) => {
+      const values = Object.entries(complexValue);
+      const result = values.map((entry) => {
+        const [key, currentValue] = entry;
+        return stringRender({ key, currentValue }, currentShift);
+      });
+      return printResult(result, currentShift);
+    };
+    const typeDispatch = {
+      added: ['+'],
+      deleted: ['-'],
+      changed: ['-', '+'],
+      unmodified: [' '],
+      nested: ['*'],
+      undefined: [' '],
+    };
+    const typeOfValue = typeDispatch[value.status];
+    return typeOfValue.map((type) => {
+      if (type === '*') return `${keyRendered}${render(value.children, currentShift)}`;
+      const usedValue = type === '-' ? value.previousValue : value.currentValue;
+      const valueRendered = _.isPlainObject(usedValue) ? printComplexValue(usedValue) : usedValue;
+      const result = keyRendered + valueRendered;
+      return (_.padStart(`${type} ${_.trim(result)}`, result.length, indent));
+    });
   };
-
   const result = data.reduce((acc, value) => {
-    const newString = typeDispatch[value.status](value, depth + 1);
-    return [...acc, newString];
+    const newElement = stringRender(value, shift);
+    return [...acc, ...newElement];
   }, '');
-  return `{\n${result.join('\n')}\n${currentIndent.repeat(depth)}}`;
+  return printResult(result, shift);
 };
 
-export default (diffData) => build(diffData);
+export default (diffData) => render(diffData);
