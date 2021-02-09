@@ -1,44 +1,48 @@
 import _ from 'lodash';
 
-const indent = ' ';
-const indentLength = 4;
-const currentIndent = indent.repeat(indentLength);
+const indentSymbol = ' ';
+const spacesCount = 4;
 
-const render = (data, shift = 0) => {
-  const printResult = (result, level) => `{\n${result.join('\n')}\n${currentIndent.repeat(level)}}`;
-  const stringRender = (value, depth) => {
-    const currentShift = depth + 1;
-    const keyRendered = `${currentIndent.repeat(currentShift) + value.key}: `;
-    const printComplexValue = (complexValue) => {
-      const values = Object.entries(complexValue);
-      const result = values.map((entry) => {
-        const [key, currentValue] = entry;
-        return stringRender({ key, currentValue }, currentShift);
-      });
-      return printResult(result, currentShift);
-    };
-    const typeDispatch = {
-      added: ['+'],
-      deleted: ['-'],
-      changed: ['-', '+'],
-      unmodified: [' '],
-      nested: ['*'],
-      undefined: [' '],
-    };
-    const typeOfValue = typeDispatch[value.status];
-    return typeOfValue.map((type) => {
-      if (type === '*') return `${keyRendered}${render(value.children, currentShift)}`;
-      const usedValue = type === '-' ? value.previousValue : value.currentValue;
-      const valueRendered = _.isPlainObject(usedValue) ? printComplexValue(usedValue) : usedValue;
-      const result = keyRendered + valueRendered;
-      return (_.padStart(`${type} ${_.trim(result)}`, result.length, indent));
+const printValue = (value, indentLevel) => {
+    if ((!_.isPlainObject(value)) || (value === null)) return value;
+    const screenLines = Object.entries(value).map(([paramName, paramValue]) => {
+        const outputIndent = indentSymbol.repeat(spacesCount * indentLevel);
+        const outputValue = paramName + `: ` + printValue(paramValue, indentLevel + 1);
+        return outputIndent + outputValue;
     });
-  };
-  const result = data.reduce((acc, value) => {
-    const newElement = stringRender(value, shift);
-    return [...acc, ...newElement];
-  }, '');
-  return printResult(result, shift);
-};
+    const closingBracketLine = indentSymbol.repeat(spacesCount * (indentLevel - 1)) + '}'; 
+    return ['{', ...screenLines, closingBracketLine].join('\n');
+}
 
-export default (diffData) => render(diffData);
+export default (diff) => {
+    const iter = (sourceDiff, depth = 1) => {
+        const indentLine = indentSymbol.repeat(spacesCount * depth - 2);
+        const closingBracket = indentSymbol.repeat(spacesCount * (depth - 1)) + '}';
+        const lines = sourceDiff.reduce((acc, value) => {
+            if (value.status === 'nested') {
+                const output = `  ${value.key}: ${iter(value.children, depth + 1)}`; 
+                return [...acc, indentLine + output];
+            } 
+            else if (value.status === 'added') {
+                const output = `+ ${value.key}: ${printValue(value.currentValue, depth + 1)}`;
+                return [...acc, indentLine + output];
+            }
+            else if (value.status === 'deleted') {
+                const output = `- ${value.key}: ${printValue(value.previousValue, depth + 1)}`;
+                return [...acc, indentLine + output];
+            }
+            else if (value.status === 'unmodified') {
+                const output = `  ${value.key}: ${printValue(value.currentValue, depth + 1)}`;
+                return [...acc, indentLine + output];
+            }
+            else if (value.status === 'changed') {
+                const output1 = `- ${value.key}: ${printValue(value.previousValue, depth + 1)}`;
+                const output2 = `+ ${value.key}: ${printValue(value.currentValue, depth + 1)}`;
+                return [...acc, indentLine + output1, indentLine + output2];
+            }
+            return acc;  
+        }, []);
+        return ['{', ...lines, closingBracket].join('\n');
+    }
+    return iter(diff);
+}
